@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -87,10 +87,10 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    start = [problem.getStartState(), 0]
+    # print("Start:", problem.getStartState())
+    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    start = [problem.getStartState(), []]
     if problem.isGoalState(start[0]):
         return []
 
@@ -100,16 +100,17 @@ def depthFirstSearch(problem):
     actions = []
 
     while not stack.isEmpty():
+        # node đang xét có dạng [state, actions]
+        # state là tọa độ [x,y] của node
+        # actions là cách đi từ node start đến node hiện tại
         node = stack.pop()
         explored.add(node[0])
+        actions = node[1]
         for child in problem.getSuccessors(node[0]):
             if child[0] not in explored:
-                stack.push(child)
-                actions.append(child[1])
+                stack.push((child[0], actions + [child[1]]))
             if problem.isGoalState(child[0]):
-                print(actions + [child[1]])
                 return actions + [child[1]]
-
     util.raiseNotDefined()
 
 
