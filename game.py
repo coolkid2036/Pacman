@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -21,14 +21,15 @@
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
 from util import *
-import time, os
+import time
+import os
 import traceback
 import sys
-
 
 #######################
 # Parts worth reading #
 #######################
+
 
 class Agent:
     """
@@ -58,11 +59,11 @@ class Directions:
 
     LEFT = {NORTH: WEST,
             SOUTH: EAST,
-            EAST: NORTH,
-            WEST: SOUTH,
-            STOP: STOP}
+            EAST:  NORTH,
+            WEST:  SOUTH,
+            STOP:  STOP}
 
-    RIGHT = dict([(y, x) for x, y in LEFT.items()])
+    RIGHT = dict([(y, x) for x, y in list(LEFT.items())])
 
     REVERSE = {NORTH: SOUTH,
                SOUTH: NORTH,
@@ -85,7 +86,7 @@ class Configuration:
         self.direction = direction
 
     def getPosition(self):
-        return self.pos
+        return (self.pos)
 
     def getDirection(self):
         return self.direction
@@ -95,7 +96,8 @@ class Configuration:
         return x == int(x) and y == int(y)
 
     def __eq__(self, other):
-        if other == None: return False
+        if other == None:
+            return False
         return (self.pos == other.pos and self.direction == other.direction)
 
     def __hash__(self):
@@ -104,7 +106,7 @@ class Configuration:
         return hash(x + 13 * y)
 
     def __str__(self):
-        return "(x,y)=" + str(self.pos) + ", " + str(self.direction)
+        return "(x,y)="+str(self.pos)+", "+str(self.direction)
 
     def generateSuccessor(self, vector):
         """
@@ -119,7 +121,7 @@ class Configuration:
         direction = Actions.vectorToDirection(vector)
         if direction == Directions.STOP:
             direction = self.direction  # There is no stop direction
-        return Configuration((x + dx, y + dy), direction)
+        return Configuration((x + dx, y+dy), direction)
 
 
 class AgentState:
@@ -132,6 +134,7 @@ class AgentState:
         self.configuration = startConfiguration
         self.isPacman = isPacman
         self.scaredTimer = 0
+        # state below potentially used for contest only
         self.numCarrying = 0
         self.numReturned = 0
 
@@ -142,7 +145,7 @@ class AgentState:
             return "Ghost: " + str(self.configuration)
 
     def __eq__(self, other):
-        if other is None:
+        if other == None:
             return False
         return self.configuration == other.configuration and self.scaredTimer == other.scaredTimer
 
@@ -158,7 +161,8 @@ class AgentState:
         return state
 
     def getPosition(self):
-        if self.configuration == None: return None
+        if self.configuration == None:
+            return None
         return self.configuration.getPosition()
 
     def getDirection(self):
@@ -175,12 +179,14 @@ class Grid:
     """
 
     def __init__(self, width, height, initialValue=False, bitRepresentation=None):
-        if initialValue not in [False, True]: raise Exception('Grids can only contain booleans')
+        if initialValue not in [False, True]:
+            raise Exception('Grids can only contain booleans')
         self.CELLS_PER_INT = 30
 
         self.width = width
         self.height = height
-        self.data = [[initialValue for y in range(height)] for x in range(width)]
+        self.data = [[initialValue for y in range(
+            height)] for x in range(width)]
         if bitRepresentation:
             self._unpackBits(bitRepresentation)
 
@@ -191,12 +197,14 @@ class Grid:
         self.data[key] = item
 
     def __str__(self):
-        out = [[str(self.data[x][y])[0] for x in range(self.width)] for y in range(self.height)]
+        out = [[str(self.data[x][y])[0] for x in range(self.width)]
+               for y in range(self.height)]
         out.reverse()
         return '\n'.join([''.join(x) for x in out])
 
     def __eq__(self, other):
-        if other == None: return False
+        if other == None:
+            return False
         return self.data == other.data
 
     def __hash__(self):
@@ -230,7 +238,8 @@ class Grid:
         list = []
         for x in range(self.width):
             for y in range(self.height):
-                if self[x][y] == key: list.append((x, y))
+                if self[x][y] == key:
+                    list.append((x, y))
         return list
 
     def packBits(self):
@@ -253,7 +262,7 @@ class Grid:
         return tuple(bits)
 
     def _cellIndexToPosition(self, index):
-        x = index // self.height
+        x = index / self.height
         y = index % self.height
         return x, y
 
@@ -264,14 +273,16 @@ class Grid:
         cell = 0
         for packed in bits:
             for bit in self._unpackInt(packed, self.CELLS_PER_INT):
-                if cell == self.width * self.height: break
+                if cell == self.width * self.height:
+                    break
                 x, y = self._cellIndexToPosition(cell)
                 self[x][y] = bit
                 cell += 1
 
     def _unpackInt(self, packed, size):
         bools = []
-        if packed < 0: raise ValueError("must be a positive integer")
+        if packed < 0:
+            raise ValueError("must be a positive integer")
         for i in range(size):
             n = 2 ** (self.CELLS_PER_INT - i - 1)
             if packed >= n:
@@ -288,23 +299,23 @@ def reconstituteGrid(bitRep):
     width, height = bitRep[:2]
     return Grid(width, height, bitRepresentation=bitRep[2:])
 
-
 ####################################
 # Parts you shouldn't have to read #
 ####################################
+
 
 class Actions:
     """
     A collection of static methods for manipulating move actions.
     """
     # Directions
-    _directions = {Directions.NORTH: (0, 1),
-                   Directions.SOUTH: (0, -1),
-                   Directions.EAST: (1, 0),
-                   Directions.WEST: (-1, 0),
-                   Directions.STOP: (0, 0)}
+    _directions = {Directions.WEST:  (-1, 0),
+                   Directions.STOP:  (0, 0),
+                   Directions.EAST:  (1, 0),
+                   Directions.NORTH: (0, 1),
+                   Directions.SOUTH: (0, -1)}
 
-    _directionsAsList = _directions.items()
+    _directionsAsList = [('West', (-1, 0)), ('Stop', (0, 0)), ('East', (1, 0)), ('North', (0, 1)), ('South', (0, -1))]
 
     TOLERANCE = .001
 
@@ -318,7 +329,6 @@ class Actions:
         if action == Directions.WEST:
             return Directions.EAST
         return action
-
     reverseDirection = staticmethod(reverseDirection)
 
     def vectorToDirection(vector):
@@ -332,13 +342,11 @@ class Actions:
         if dx > 0:
             return Directions.EAST
         return Directions.STOP
-
     vectorToDirection = staticmethod(vectorToDirection)
 
     def directionToVector(direction, speed=1.0):
         dx, dy = Actions._directions[direction]
         return (dx * speed, dy * speed)
-
     directionToVector = staticmethod(directionToVector)
 
     def getPossibleActions(config, walls):
@@ -354,7 +362,8 @@ class Actions:
             dx, dy = vec
             next_y = y_int + dy
             next_x = x_int + dx
-            if not walls[next_x][next_y]: possible.append(dir)
+            if not walls[next_x][next_y]:
+                possible.append(dir)
 
         return possible
 
@@ -367,26 +376,24 @@ class Actions:
         for dir, vec in Actions._directionsAsList:
             dx, dy = vec
             next_x = x_int + dx
-            if next_x < 0 or next_x == walls.width: continue
+            if next_x < 0 or next_x == walls.width:
+                continue
             next_y = y_int + dy
-            if next_y < 0 or next_y == walls.height: continue
-            if not walls[next_x][next_y]: neighbors.append((next_x, next_y))
+            if next_y < 0 or next_y == walls.height:
+                continue
+            if not walls[next_x][next_y]:
+                neighbors.append((next_x, next_y))
         return neighbors
-
     getLegalNeighbors = staticmethod(getLegalNeighbors)
 
     def getSuccessor(position, action):
         dx, dy = Actions.directionToVector(action)
         x, y = position
         return (x + dx, y + dy)
-
     getSuccessor = staticmethod(getSuccessor)
 
 
 class GameStateData:
-    """
-
-    """
 
     def __init__(self, prevState=None):
         """
@@ -428,12 +435,17 @@ class GameStateData:
         """
         Allows two states to be compared.
         """
-        if other == None: return False
+        if other == None:
+            return False
         # TODO Check for type of other
-        if not self.agentStates == other.agentStates: return False
-        if not self.food == other.food: return False
-        if not self.capsules == other.capsules: return False
-        if not self.score == other.score: return False
+        if not self.agentStates == other.agentStates:
+            return False
+        if not self.food == other.food:
+            return False
+        if not self.capsules == other.capsules:
+            return False
+        if not self.score == other.score:
+            return False
         return True
 
     def __hash__(self):
@@ -446,8 +458,7 @@ class GameStateData:
             except TypeError as e:
                 print(e)
                 # hash(state)
-        return int((hash(tuple(self.agentStates)) + 13 * hash(self.food) + 113 * hash(tuple(self.capsules)) + 7 * hash(
-            self.score)) % 1048575)
+        return int((hash(tuple(self.agentStates)) + 13*hash(self.food) + 113 * hash(tuple(self.capsules)) + 7 * hash(self.score)) % 1048575)
 
     def __str__(self):
         width, height = self.layout.width, self.layout.height
@@ -460,8 +471,10 @@ class GameStateData:
                 map[x][y] = self._foodWallStr(food[x][y], walls[x][y])
 
         for agentState in self.agentStates:
-            if agentState == None: continue
-            if agentState.configuration == None: continue
+            if agentState == None:
+                continue
+            if agentState.configuration == None:
+                continue
             x, y = [int(i) for i in nearestPoint(agentState.configuration.pos)]
             agent_dir = agentState.configuration.direction
             if agentState.isPacman:
@@ -506,7 +519,7 @@ class GameStateData:
         Creates an initial game state from a layout array (see layout.py).
         """
         self.food = layout.food.copy()
-        # self.capsules = []
+        #self.capsules = []
         self.capsules = layout.capsules[:]
         self.layout = layout
         self.score = 0
@@ -520,13 +533,13 @@ class GameStateData:
                     continue  # Max ghosts reached already
                 else:
                     numGhosts += 1
-            self.agentStates.append(AgentState(Configuration(pos, Directions.STOP), isPacman))
+            self.agentStates.append(AgentState(
+                Configuration(pos, Directions.STOP), isPacman))
         self._eaten = [False for a in self.agentStates]
 
 
 try:
     import boinc
-
     _BOINC_ENABLED = True
 except:
     _BOINC_ENABLED = False
@@ -561,7 +574,8 @@ class Game:
 
     def _agentCrash(self, agentIndex, quiet=False):
         "Helper method for handling agent crashes"
-        if not quiet: traceback.print_exc()
+        if not quiet:
+            traceback.print_exc()
         self.gameOver = True
         self.agentCrashed = True
         self.rules.agentCrash(self, agentIndex)
@@ -570,7 +584,8 @@ class Game:
     OLD_STDERR = None
 
     def mute(self, agentIndex):
-        if not self.muteAgents: return
+        if not self.muteAgents:
+            return
         global OLD_STDOUT, OLD_STDERR
         import io
         OLD_STDOUT = sys.stdout
@@ -579,7 +594,8 @@ class Game:
         sys.stderr = self.agentOutput[agentIndex]
 
     def unmute(self):
-        if not self.muteAgents: return
+        if not self.muteAgents:
+            return
         global OLD_STDOUT, OLD_STDERR
         # Revert stdout/stderr to originals
         sys.stdout = OLD_STDOUT
@@ -592,7 +608,7 @@ class Game:
         self.display.initialize(self.state.data)
         self.numMoves = 0
 
-        ###self.display.initialize(self.state.makeObservation(1).data)
+        # self.display.initialize(self.state.makeObservation(1).data)
         # inform learning agents of the game start
         for i in range(len(self.agents)):
             agent = self.agents[i]
@@ -608,14 +624,16 @@ class Game:
                 self.mute(i)
                 if self.catchExceptions:
                     try:
-                        timed_func = TimeoutFunction(agent.registerInitialState, int(self.rules.getMaxStartupTime(i)))
+                        timed_func = TimeoutFunction(
+                            agent.registerInitialState, int(self.rules.getMaxStartupTime(i)))
                         try:
                             start_time = time.time()
                             timed_func(self.state.deepCopy())
                             time_taken = time.time() - start_time
                             self.totalAgentTimes[i] += time_taken
                         except TimeoutFunctionException:
-                            print("Agent %d ran out of time on startup!" % i, file=sys.stderr)
+                            print("Agent %d ran out of time on startup!" %
+                                  i, file=sys.stderr)
                             self.unmute()
                             self.agentTimeout = True
                             self._agentCrash(i, quiet=True)
@@ -626,7 +644,7 @@ class Game:
                         return
                 else:
                     agent.registerInitialState(self.state.deepCopy())
-                ## TODO: could this exceed the total time
+                # TODO: could this exceed the total time
                 self.unmute()
 
         agentIndex = self.startingIndex
@@ -642,8 +660,8 @@ class Game:
                 self.mute(agentIndex)
                 if self.catchExceptions:
                     try:
-                        timed_func = TimeoutFunction(agent.observationFunction,
-                                                     int(self.rules.getMoveTimeout(agentIndex)))
+                        timed_func = TimeoutFunction(agent.observationFunction, int(
+                            self.rules.getMoveTimeout(agentIndex)))
                         try:
                             start_time = time.time()
                             observation = timed_func(self.state.deepCopy())
@@ -656,7 +674,8 @@ class Game:
                         self.unmute()
                         return
                 else:
-                    observation = agent.observationFunction(self.state.deepCopy())
+                    observation = agent.observationFunction(
+                        self.state.deepCopy())
                 self.unmute()
             else:
                 observation = self.state.deepCopy()
@@ -666,15 +685,16 @@ class Game:
             self.mute(agentIndex)
             if self.catchExceptions:
                 try:
-                    timed_func = TimeoutFunction(agent.getAction,
-                                                 int(self.rules.getMoveTimeout(agentIndex)) - int(move_time))
+                    timed_func = TimeoutFunction(agent.getAction, int(
+                        self.rules.getMoveTimeout(agentIndex)) - int(move_time))
                     try:
                         start_time = time.time()
                         if skip_action:
                             raise TimeoutFunctionException()
                         action = timed_func(observation)
                     except TimeoutFunctionException:
-                        print("Agent %d timed out on a single move!" % agentIndex, file=sys.stderr)
+                        print("Agent %d timed out on a single move!" %
+                              agentIndex, file=sys.stderr)
                         self.agentTimeout = True
                         self._agentCrash(agentIndex, quiet=True)
                         self.unmute()
@@ -685,21 +705,20 @@ class Game:
                     if move_time > self.rules.getMoveWarningTime(agentIndex):
                         self.totalAgentTimeWarnings[agentIndex] += 1
                         print("Agent %d took too long to make a move! This is warning %d" % (
-                        agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
+                            agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
                         if self.totalAgentTimeWarnings[agentIndex] > self.rules.getMaxTimeWarnings(agentIndex):
                             print("Agent %d exceeded the maximum number of warnings: %d" % (
-                            agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
+                                agentIndex, self.totalAgentTimeWarnings[agentIndex]), file=sys.stderr)
                             self.agentTimeout = True
                             self._agentCrash(agentIndex, quiet=True)
                             self.unmute()
                             return
 
                     self.totalAgentTimes[agentIndex] += move_time
-                    # print("Agent: %d, time: %f, total: %f" % (agentIndex, move_time, self.totalAgentTimes[agentIndex]))
+                    # print "Agent: %d, time: %f, total: %f" % (agentIndex, move_time, self.totalAgentTimes[agentIndex])
                     if self.totalAgentTimes[agentIndex] > self.rules.getMaxTotalTime(agentIndex):
-                        print(
-                            "Agent %d ran out of time! (time: %1.2f)" % (agentIndex, self.totalAgentTimes[agentIndex]),
-                            file=sys.stderr)
+                        print("Agent %d ran out of time! (time: %1.2f)" % (
+                            agentIndex, self.totalAgentTimes[agentIndex]), file=sys.stderr)
                         self.agentTimeout = True
                         self._agentCrash(agentIndex, quiet=True)
                         self.unmute()
@@ -717,7 +736,8 @@ class Game:
             self.moveHistory.append((agentIndex, action))
             if self.catchExceptions:
                 try:
-                    self.state = self.state.generateSuccessor(agentIndex, action)
+                    self.state = self.state.generateSuccessor(
+                        agentIndex, action)
                 except Exception as data:
                     self.mute(agentIndex)
                     self._agentCrash(agentIndex)
@@ -734,7 +754,8 @@ class Game:
             # Allow for game specific conditions (winning, losing, etc.)
             self.rules.process(self.state, self)
             # Track progress
-            if agentIndex == numAgents + 1: self.numMoves += 1
+            if agentIndex == numAgents + 1:
+                self.numMoves += 1
             # Next agent
             agentIndex = (agentIndex + 1) % numAgents
 
@@ -749,7 +770,8 @@ class Game:
                     agent.final(self.state)
                     self.unmute()
                 except Exception as data:
-                    if not self.catchExceptions: raise data
+                    if not self.catchExceptions:
+                        raise
                     self._agentCrash(agentIndex)
                     self.unmute()
                     return

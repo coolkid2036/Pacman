@@ -87,9 +87,6 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    # print("Start:", problem.getStartState())
-    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     start = [problem.getStartState(), []]
     if problem.isGoalState(start[0]):
         return []
@@ -100,9 +97,6 @@ def depthFirstSearch(problem):
     actions = []
 
     while not stack.isEmpty():
-        # node đang xét có dạng [state, actions]
-        # state là tọa độ [x,y] của node
-        # actions là cách đi từ node start đến node hiện tại
         node = stack.pop()
         explored.add(node[0])
         actions = node[1]
@@ -122,7 +116,7 @@ def breadthFirstSearch(problem):
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
+
     util.raiseNotDefined()
 
 
