@@ -94,7 +94,6 @@ def depthFirstSearch(problem):
     stack = util.Stack()
     stack.push(start)
     explored = set()
-    actions = []
 
     while not stack.isEmpty():
         node = stack.pop()
@@ -110,7 +109,21 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
+    start = [problem.getStartState(), 0]
+    queue = util.Queue()
+    queue.push(start)
+    explored = set()
+    cost = 0
+
+    while not queue.isEmpty():
+        cost += 1
+        node = queue.pop()
+        explored.add(node)
+        for child in problem.getSuccessors(node[0]):
+            child_node = [child[0], child[1], cost, node]
+            if problem.isGoalState(child_node[0]):
+                while 
+
     util.raiseNotDefined()
 
 
