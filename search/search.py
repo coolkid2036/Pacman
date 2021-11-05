@@ -87,7 +87,7 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    start = [problem.getStartState(), []]
+    start = goal = (problem.getStartState(), [])
     if problem.isGoalState(start[0]):
         return []
 
@@ -95,34 +95,45 @@ def depthFirstSearch(problem):
     stack.push(start)
     explored = set()
 
-    while not stack.isEmpty():
+    while not stack.isEmpty() and not problem.isGoalState(goal[0]):
         node = stack.pop()
         explored.add(node[0])
-        actions = node[1]
         for child in problem.getSuccessors(node[0]):
             if child[0] not in explored:
-                stack.push((child[0], actions + [child[1]]))
-            if problem.isGoalState(child[0]):
-                return actions + [child[1]]
+                goal = (child[0], child[1], node)
+                stack.push(goal)
+    if goal is not start:
+        actions = []
+        while len(goal) == 3:
+            actions.append(goal[1])
+            goal = goal[2]
+        actions.reverse()
+        return actions
+
     util.raiseNotDefined()
 
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    start = [problem.getStartState(), 0]
+    start = (problem.getStartState(), [])
     queue = util.Queue()
     queue.push(start)
     explored = set()
-    cost = 0
+    explored.add(start[0])
+    actions = []
 
     while not queue.isEmpty():
-        cost += 1
         node = queue.pop()
-        explored.add(node)
+        if problem.isGoalState(node[0]):
+            while len(node) == 3:
+                actions.append(node[1])
+                node = node[2]
+            actions.reverse()
+            return actions
         for child in problem.getSuccessors(node[0]):
-            child_node = [child[0], child[1], cost, node]
-            if problem.isGoalState(child_node[0]):
-                while 
+            if child[0] not in explored:
+                explored.add(child[0])
+                queue.push((child[0], child[1], node))
 
     util.raiseNotDefined()
 
