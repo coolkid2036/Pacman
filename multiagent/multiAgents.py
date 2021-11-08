@@ -4,19 +4,18 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
-
 from util import manhattanDistance
 from game import Directions
 import random, util
 
 from game import Agent
+
 
 class ReflexAgent(Agent):
     """
@@ -27,7 +26,6 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
-
 
     def getAction(self, gameState):
         """
@@ -45,7 +43,7 @@ class ReflexAgent(Agent):
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -74,7 +72,33 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        # tính điểm theo khoảng cách từ pacman đến ghost
+        closeGhost = 0
+        for i in range(len(newGhostStates)):
+            distance = manhattanDistance(newPos, newGhostStates[i].getPosition())
+            # Nếu gần ghost đang sợ thì có khả năng xơi -> tăng điểm
+            if distance <= newScaredTimes[i] / 1.5:
+                closeGhost += (1. / distance) * 100
+            # Nếu gần ghost đang không sợ thì dễ bị xơi -> trừ điểm
+            elif distance <= 3:
+                closeGhost -= (1. / distance) * 100
+
+        # tính điểm theo khoảng cách từ pacman đến food
+        closeFood = 0
+        # check 2 hàng xung quanh pacman nếu có food thì cộng điểm
+        for row in range(newPos[0] - 2, newPos[0] + 2):
+            for col in range(newPos[1] - 2, newPos[1] + 2):
+                # newFood[x][y] trả về True nếu vị trí (x, y) có food
+                if newFood[row][col]:
+                    closeFood += 1
+
+        # cộng điểm bước này ăn đc food
+        eatFood = 0
+        if newPos in currentGameState.getFood().asList():
+            eatFood = 10
+
+        return eatFood + closeFood + closeGhost
+
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -85,6 +109,7 @@ def scoreEvaluationFunction(currentGameState):
     (not reflex agents).
     """
     return currentGameState.getScore()
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -101,10 +126,11 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
-        self.index = 0 # Pacman is always agent index 0
+    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
+        self.index = 0  # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -137,6 +163,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
+
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
@@ -148,6 +175,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -164,6 +192,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
+
 def betterEvaluationFunction(currentGameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
@@ -173,6 +202,7 @@ def betterEvaluationFunction(currentGameState):
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
+
 
 # Abbreviation
 better = betterEvaluationFunction
