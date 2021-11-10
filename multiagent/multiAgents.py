@@ -75,11 +75,11 @@ class ReflexAgent(Agent):
 
         #distance from food to pacman
         dis_foods_pacman = [manhattanDistance(newPos, food) for food in newFood.asList()]
-        min_dis_food_pacman = 0
+
+        min_dis_food_pacman = 1
         if len(dis_foods_pacman) > 0:
             min_dis_food_pacman = min(dis_foods_pacman)
-        else:
-            min_dis_food_pacman = 0
+
         min_dis_food_coor_index = [index for index in range(len(dis_foods_pacman)) if dis_foods_pacman[index] == min_dis_food_pacman]
 
         #distance from ghost to pacman
@@ -89,13 +89,15 @@ class ReflexAgent(Agent):
         #distance from ghost to food
         dis_food_ghost = [manhattanDistance(ghost, newFood.asList()[random.choice(min_dis_food_coor_index)]) for ghost in ghostPositions]
 
-        point = 10
+        point = 1 / min_dis_food_pacman * 10
 
         for dis in dis_ghost_pacman:
-            if (dis <= 1):
-                point-=1
+            if (dis == 0):
+                point-=999
+            elif (dis == 1):
+                point-=1/dis
             else:
-                point+=1
+                point+=1/dis
         
         # for dis in dis_food_ghost:
         #     if (dis <= 1):
@@ -103,8 +105,10 @@ class ReflexAgent(Agent):
         #     else:
         #         point = point + 1
 
-        print(newPos, min_dis_food_pacman)
-
+        if action == 'Stop':
+            point = 0
+        
+        print(dis_foods_pacman ,newPos, min_dis_food_pacman, point)
         return point
 
 
