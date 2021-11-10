@@ -39,6 +39,7 @@ class ReflexAgent(Agent):
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
 
+        print(legalMoves)
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
@@ -73,6 +74,8 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
 
+        # tìm đến food gần nhất và kiểm tra xem khoảng cách đến ghost như nào
+
         #distance from food to pacman
         dis_foods_pacman = [manhattanDistance(newPos, food) for food in newFood.asList()]
 
@@ -80,14 +83,14 @@ class ReflexAgent(Agent):
         if len(dis_foods_pacman) > 0:
             min_dis_food_pacman = min(dis_foods_pacman)
 
-        min_dis_food_coor_index = [index for index in range(len(dis_foods_pacman)) if dis_foods_pacman[index] == min_dis_food_pacman]
+        #min_dis_food_coor_index = [index for index in range(len(dis_foods_pacman)) if dis_foods_pacman[index] == min_dis_food_pacman]
 
         #distance from ghost to pacman
         ghostPositions = successorGameState.getGhostPositions()
         dis_ghost_pacman = [manhattanDistance(newPos, ghost) for ghost in ghostPositions]
         
         #distance from ghost to food
-        dis_food_ghost = [manhattanDistance(ghost, newFood.asList()[random.choice(min_dis_food_coor_index)]) for ghost in ghostPositions]
+        #dis_food_ghost = [manhattanDistance(ghost, newFood.asList()[random.choice(min_dis_food_coor_index)]) for ghost in ghostPositions]
 
         point = 1 / min_dis_food_pacman * 10
 
@@ -99,15 +102,12 @@ class ReflexAgent(Agent):
             else:
                 point+=1/dis
         
-        # for dis in dis_food_ghost:
-        #     if (dis <= 1):
-        #         point = point - 1
-        #     else:
-        #         point = point + 1
+        if newPos in currentGameState.getFood().asList():
+            point += 10
 
         if action == 'Stop':
             point = 0
-        
+
         print(dis_foods_pacman ,newPos, min_dis_food_pacman, point)
         return point
 
