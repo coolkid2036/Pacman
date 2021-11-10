@@ -39,7 +39,6 @@ class ReflexAgent(Agent):
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
 
-        print(legalMoves)
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
@@ -108,7 +107,6 @@ class ReflexAgent(Agent):
         if action == 'Stop':
             point = 0
 
-        print(dis_foods_pacman ,newPos, min_dis_food_pacman, point)
         return point
 
 
