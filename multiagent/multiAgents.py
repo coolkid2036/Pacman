@@ -72,32 +72,40 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        # tính điểm theo khoảng cách từ pacman đến ghost
-        closeGhost = 0
-        for i in range(len(newGhostStates)):
-            distance = manhattanDistance(newPos, newGhostStates[i].getPosition())
-            # Nếu gần ghost đang sợ thì có khả năng xơi -> tăng điểm
-            if distance <= newScaredTimes[i] / 1.5:
-                closeGhost += (1. / distance) * 100
-            # Nếu gần ghost đang không sợ thì dễ bị xơi -> trừ điểm
-            elif distance <= 3:
-                closeGhost -= (1. / distance) * 100
 
-        # tính điểm theo khoảng cách từ pacman đến food
-        closeFood = 0
-        # check 2 hàng xung quanh pacman nếu có food thì cộng điểm
-        for row in range(newPos[0] - 2, newPos[0] + 2):
-            for col in range(newPos[1] - 2, newPos[1] + 2):
-                # newFood[x][y] trả về True nếu vị trí (x, y) có food
-                if newFood[row][col]:
-                    closeFood += 1
+        #distance from food to pacman
+        dis_foods_pacman = [manhattanDistance(newPos, food) for food in newFood.asList()]
+        min_dis_food_pacman = 0
+        if len(dis_foods_pacman) > 0:
+            min_dis_food_pacman = min(dis_foods_pacman)
+        else:
+            min_dis_food_pacman = 0
+        min_dis_food_coor_index = [index for index in range(len(dis_foods_pacman)) if dis_foods_pacman[index] == min_dis_food_pacman]
 
-        # cộng điểm bước này ăn đc food
-        eatFood = 0
-        if newPos in currentGameState.getFood().asList():
-            eatFood = 10
+        #distance from ghost to pacman
+        ghostPositions = successorGameState.getGhostPositions()
+        dis_ghost_pacman = [manhattanDistance(newPos, ghost) for ghost in ghostPositions]
+        
+        #distance from ghost to food
+        dis_food_ghost = [manhattanDistance(ghost, newFood.asList()[random.choice(min_dis_food_coor_index)]) for ghost in ghostPositions]
 
-        return eatFood + closeFood + closeGhost
+        point = 10
+
+        for dis in dis_ghost_pacman:
+            if (dis <= 1):
+                point-=1
+            else:
+                point+=1
+        
+        # for dis in dis_food_ghost:
+        #     if (dis <= 1):
+        #         point = point - 1
+        #     else:
+        #         point = point + 1
+
+        print(newPos, min_dis_food_pacman)
+
+        return point
 
 
 def scoreEvaluationFunction(currentGameState):
