@@ -76,6 +76,9 @@ class ReflexAgent(Agent):
         closeGhost = 0
         for i in range(len(newGhostStates)):
             distance = manhattanDistance(newPos, newGhostStates[i].getPosition())
+            # Nếu khoảng cách = 0 (bị xơi) thì cho điểm xuống gần 0
+            if distance == 0:
+                distance = 1e-10
             # Nếu gần ghost đang sợ thì có khả năng xơi -> tăng điểm
             if distance <= newScaredTimes[i] / 1.5:
                 closeGhost += (1. / distance) * 100
@@ -85,12 +88,13 @@ class ReflexAgent(Agent):
 
         # tính điểm theo khoảng cách từ pacman đến food
         closeFood = 0
-        # check 2 hàng xung quanh pacman nếu có food thì cộng điểm
+        foodPos = newFood.asList()
+        # check 2x2 ô xung quanh pacman nếu có food thì cộng điểm
         for row in range(newPos[0] - 2, newPos[0] + 2):
             for col in range(newPos[1] - 2, newPos[1] + 2):
                 # newFood[x][y] trả về True nếu vị trí (x, y) có food
                 if newFood[row][col]:
-                    closeFood += 1
+                    closeFood += (abs(row - newPos[0]) + abs(col - newPos[1]))
 
         # cộng điểm bước này ăn đc food
         eatFood = 0
