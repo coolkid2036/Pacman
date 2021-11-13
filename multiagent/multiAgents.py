@@ -170,7 +170,40 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
+        "* YOUR CODE HERE *"
+        def maxLevel(gameState, depth):
+            currentDepth = depth + 1
+            if gameState.isWin() or gameState.isLose() or currentDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            maxValue = -float('inf')
+            actions = gameState.getLegalActions(0)
+            for action in actions:
+                successor = gameState.generateSuccessor(0, action)
+                maxValue = max(maxValue, minLevel(successor, currentDepth, 1))
+            return maxValue
+        
+        numberOfGhosts = gameState.getNumAgents() - 1
+
+        def minLevel(gameState, depth, agentIndex):
+            if gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState)
+            minValue = float('inf')
+            for action in gameState.getLegalActions(agentIndex):
+                successor = gameState.generateSuccessor(agentIndex, action)
+                if agentIndex == numberOfGhosts:
+                    minValue = min(minValue, maxLevel(successor, depth))
+                else:
+                    minValue = min(minValue, minLevel(successor, depth, agentIndex + 1))
+            return minValue
+        
+        currentScore = -float('inf')
+        bestAction = ''
+        for action in gameState.getLegalActions(0):
+            score = minLevel(gameState.generateSuccessor(0, action), 0, 1)
+            if score > currentScore:
+                currentScore = score
+                bestAction = action
+        return bestAction
         util.raiseNotDefined()
 
 
@@ -200,7 +233,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+        print()
+        return 1
 
 
 def betterEvaluationFunction(currentGameState):
@@ -211,8 +246,17 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    foodPositions = currentGameState.getFood().asList()
+    pacmanPosition = currentGameState.getPacmanPosition()
+    dis = manhattanDistance(foodPositions, pacmanPosition)
+
+    print(dis)
+
+    # util.raiseNotDefined()
+    return int.parse(dis)
+
+    
 
 # Abbreviation
 better = betterEvaluationFunction
