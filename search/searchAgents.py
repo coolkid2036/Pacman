@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -295,6 +295,8 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        explored_corners = []
+        return self.startingPosition, explored_corners
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -302,6 +304,8 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        explored_corners = state[1]
+        return len(explored_corners) == 4
         util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -325,6 +329,16 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = next_state = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            explored_corners = list(state[1])
+
+            if not hitsWall:
+                if next_state in self.corners and next_state not in explored_corners:
+                    explored_corners.append(next_state)
+                successors.append(((next_state, explored_corners), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -360,7 +374,24 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    # def euclideanDistance(xy1, xy2):
+    #     return ((xy1[0] - xy2[0]) ** 2 + (xy1[1] - xy2[1]) ** 2) ** 0.5
+    # explored_corners = state[1]
+    # unexplored_corners = []
+    # for corner in corners:
+    #     if corner not in explored_corners:
+    #         unexplored_corners.append(corner)
+    # result = 0
+    # xy1 = state[0]
+    # min_distance = 99999
+    # while len(unexplored_corners) != 0:
+    #     for corner in unexplored_corners:
+    #         if min_distance > util.manhattanDistance(xy1, corner):
+    #             min_distance = util.manhattanDistance(xy1, corner)
+    #             xy1 = corner
+    #     result += min_distance
+    # return result
+    # return 0  Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

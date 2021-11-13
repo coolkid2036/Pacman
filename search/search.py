@@ -93,15 +93,16 @@ def depthFirstSearch(problem):
 
     stack = util.Stack()
     stack.push(start)
-    explored = set()
+    explored = []
 
     while not stack.isEmpty() and not problem.isGoalState(goal[0]):
         node = stack.pop()
-        explored.add(node[0])
+        explored.append(node[0])
         for child in problem.getSuccessors(node[0]):
             if child[0] not in explored:
                 goal = (child[0], child[1], node)
                 stack.push(goal)
+
     if goal is not start:
         actions = []
         while len(goal) == 3:
@@ -118,8 +119,7 @@ def breadthFirstSearch(problem):
     start = (problem.getStartState(), [])
     queue = util.Queue()
     queue.push(start)
-    explored = set()
-    explored.add(start[0])
+    explored = [start[0]]
 
     while not queue.isEmpty():
         node = queue.pop()
@@ -132,7 +132,7 @@ def breadthFirstSearch(problem):
             return actions
         for child in problem.getSuccessors(node[0]):
             if child[0] not in explored:
-                explored.add(child[0])
+                explored.append(child[0])
                 queue.push((child[0], child[1], node))
 
     util.raiseNotDefined()
@@ -143,12 +143,12 @@ def uniformCostSearch(problem):
     start = (problem.getStartState(), [], 0)
     p_queue = util.PriorityQueue()
     p_queue.push(start, 0)
-    explored = set()
+    explored = []
 
     while not p_queue.isEmpty():
         node = p_queue.pop()
         if node[0] not in explored:
-            explored.add(node[0])
+            explored.append(node[0])
             if problem.isGoalState(node[0]):
                 actions = []
                 while len(node) == 4:
@@ -156,8 +156,8 @@ def uniformCostSearch(problem):
                     node = node[3]
                 actions.reverse()
                 return actions
-            for child in problem.getSuccessors(node[0]):
-                p_queue.push((child[0], child[1], child[2] + node[2], node), child[2] + node[2])
+            for c in problem.getSuccessors(node[0]):
+                p_queue.push((c[0], c[1], c[2] + node[2], node), c[2] + node[2])
 
     util.raiseNotDefined()
 
@@ -172,7 +172,25 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+    start = (problem.getStartState(), [], 0)
+    p_queue = util.PriorityQueue()
+    p_queue.push(start, 0)
+    explored = []
+
+    while not p_queue.isEmpty():
+        node = p_queue.pop()
+        if node[0] not in explored:
+            explored.append(node[0])
+            if problem.isGoalState(node[0]):
+                actions = []
+                while len(node) == 4:
+                    actions.append(node[1])
+                    node = node[3]
+                actions.reverse()
+                return actions
+            for c in problem.getSuccessors(node[0]):
+                p_queue.push((c[0], c[1], c[2] + node[2], node), c[2] + node[2] + heuristic(c[0], problem))
+
     util.raiseNotDefined()
 
 
