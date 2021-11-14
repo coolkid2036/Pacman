@@ -307,7 +307,7 @@ class CornersProblem(search.SearchProblem):
         "*** YOUR CODE HERE ***"
         explored_corners = []
         return self.startingPosition, explored_corners
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
 
     def isGoalState(self, state):
         """
@@ -316,7 +316,7 @@ class CornersProblem(search.SearchProblem):
         "*** YOUR CODE HERE ***"
         explored_corners = state[1]
         return len(explored_corners) == 4
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
 
     def getSuccessors(self, state):
         """
@@ -343,7 +343,7 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = next_state = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
-            explored_corners = list(state[1])
+            explored_corners = state[1].copy()
 
             if not hitsWall:
                 if next_state in self.corners and next_state not in explored_corners:
@@ -385,12 +385,12 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
 
-    def getClosestCorner(current_position, unexplored_corners):
+    def getClosestCorner(position, unexplored_corners):
         min_distance = 99999
         closest_corner = None
         if unexplored_corners:
             for corner in unexplored_corners:
-                distance = util.manhattanDistance(current_position, corner)
+                distance = util.manhattanDistance(position, corner)
                 if distance < min_distance:
                     min_distance = distance
                     closest_corner = corner
@@ -402,14 +402,13 @@ def cornersHeuristic(state, problem):
         if corner not in explored_corners:
             unexplored_corners.append(corner)
     total_distance = 0
-    current_position = state[0]
-    closest_corner = getClosestCorner(current_position, unexplored_corners)
-    while closest_corner is not None:
-        min_distance = util.manhattanDistance(current_position, closest_corner)
-        total_distance += min_distance
-        current_position = closest_corner
+    position = state[0]
+    closest_corner = getClosestCorner(position, unexplored_corners)
+    while closest_corner:
+        total_distance += util.manhattanDistance(position, closest_corner)
+        position = closest_corner
         unexplored_corners.remove(closest_corner)
-        closest_corner = getClosestCorner(current_position, unexplored_corners)
+        closest_corner = getClosestCorner(position, unexplored_corners)
     return total_distance
     # return 0  Default to trivial solution
 
@@ -512,7 +511,30 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    # def getClosestFood(position, food_list):
+    #     min_distance = 99999
+    #     closest_food = None
+    #     if food_list:
+    #         for food in food_list:
+    #             distance = util.manhattanDistance(position, food)
+    #             if distance < min_distance:
+    #                 min_distance = distance
+    #                 closest_food = food
+    #     return closest_food
+
+    food_list = foodGrid.asList()
+    total_distance = [0]
+    for food in food_list:
+        total_distance.append(util.manhattanDistance(position, food))
+    return max(total_distance)
+    # total_distance = 0
+    # closest_food = getClosestFood(position, food_list)
+    # while closest_food:
+    #     total_distance += util.manhattanDistance(position, closest_food)
+    #     position = closest_food
+    #     food_list.remove(closest_food)
+    #     closest_food = getClosestFood(position, food_list)
+    # return total_distance
 
 
 class ClosestDotSearchAgent(SearchAgent):
