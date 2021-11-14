@@ -234,8 +234,40 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         # util.raiseNotDefined()
-        print()
-        return 1
+        def maxLevel(gameState, depth):
+            currentDepth = depth + 1
+            if gameState.isWin() or gameState.isLose() or currentDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            maxValue = -float('inf')
+            actions = gameState.getLegalActions(0)
+            for action in actions:
+                successor = gameState.generateSuccessor(0, action)
+                maxValue = max(maxValue, chanceNode(successor, currentDepth, 1))
+            return maxValue
+        
+        numberOfGhosts = gameState.getNumAgents() - 1
+
+        def chanceNode(gameState, depth, agentIndex):
+            if gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState)
+            avgValue = 0
+            legalActions = gameState.getLegalActions(agentIndex)
+            for action in legalActions:
+                successor = gameState.generateSuccessor(agentIndex, action)
+                if agentIndex == numberOfGhosts:
+                    avgValue = avgValue + maxLevel(successor, depth)
+                else:
+                    avgValue = avgValue + chanceNode(successor, depth, agentIndex + 1)
+            return avgValue/len(legalActions)
+        
+        currentScore = -float('inf')
+        bestAction = ''
+        for action in gameState.getLegalActions(0):
+            score = chanceNode(gameState.generateSuccessor(0, action), 0, 1)
+            if score > currentScore:
+                currentScore = score
+                bestAction = action
+        return bestAction
 
 
 def betterEvaluationFunction(currentGameState):
