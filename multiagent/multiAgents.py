@@ -350,31 +350,29 @@ def betterEvaluationFunction(currentGameState):
     """
     "*** YOUR CODE HERE ***"
 
+    # Lấy thông tin hữu ích
     foodPositions = currentGameState.getFood().asList()
     pacmanPosition = currentGameState.getPacmanPosition()
-    ghostPositions = currentGameState.getGhostPositions()
-    capsulePositions = currentGameState.getCapsules()
+    ghostPosition = currentGameState.getGhostPositions()
 
+    # Vị trí thức ăn gần nhất
     closetFood = 1
     if len(foodPositions) != 0: 
         closetFood = min([manhattanDistance(food, pacmanPosition) for food in foodPositions])
+
+    # Tính điểm
+    # Thức ăn càng gần => càng cao
     score = 1/closetFood * 10
 
-    score -= sum([manhattanDistance(pacmanPosition, ghost) for ghost in ghostPositions])
-
-    for ghost in ghostPositions:
+    #Xét vị trí ghost, ghost càng gần điểm càng thấp
+    for ghost in ghostPosition:
         temp = manhattanDistance(pacmanPosition, ghost)
         if temp == 0:
             score -=999
         elif temp <= 1:
             score -= 1/temp
-        else:
-            score += 1/temp
 
-    # util.raiseNotDefined()
     return currentGameState.getScore() + score
-
-    
 
 # Abbreviation
 better = betterEvaluationFunction
