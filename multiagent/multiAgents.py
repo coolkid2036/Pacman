@@ -73,26 +73,22 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
 
-        # tìm đến food gần nhất và kiểm tra xem khoảng cách đến ghost như nào
+        #Khoảng cách từ food tới pacman
+        foodDistances = [manhattanDistance(newPos, food) for food in newFood.asList()]
 
-        #distance from food to pacman
-        dis_foods_pacman = [manhattanDistance(newPos, food) for food in newFood.asList()]
+        closetFood = 1
+        if len(foodDistances) > 0:
+            closetFood = min(foodDistances)
 
-        min_dis_food_pacman = 1
-        if len(dis_foods_pacman) > 0:
-            min_dis_food_pacman = min(dis_foods_pacman)
-
-        #min_dis_food_coor_index = [index for index in range(len(dis_foods_pacman)) if dis_foods_pacman[index] == min_dis_food_pacman]
-
-        #distance from ghost to pacman
+        #Khoảng cách từ ghost tới pacman
         ghostPositions = successorGameState.getGhostPositions()
         dis_ghost_pacman = [manhattanDistance(newPos, ghost) for ghost in ghostPositions]
         
-        #distance from ghost to food
-        #dis_food_ghost = [manhattanDistance(ghost, newFood.asList()[random.choice(min_dis_food_coor_index)]) for ghost in ghostPositions]
+        # Điểm đánh giá từ khoảng cách pacman đến thức ăn gần nhất
+        point = 1 / closetFood * 10
 
-        point = 1 / min_dis_food_pacman * 10
-
+        # Điểm đánh giá từ vị trí ghost tới vị trí pacman
+        # Càng gần thì điểm càng thấp
         for dis in dis_ghost_pacman:
             if (dis == 0):
                 point-=999
@@ -101,9 +97,11 @@ class ReflexAgent(Agent):
             else:
                 point+=1/dis
         
+        # Kiểm tra xem vị trí hiện tại có thức ăn ko
         if newPos in currentGameState.getFood().asList():
             point += 10
 
+        # Dừng lại luôn không là giải pháp tối ưu
         if action == 'Stop':
             point = 0
 
@@ -172,9 +170,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "* YOUR CODE HERE *"
         def maxLevel(gameState, depth):
+
             currentDepth = depth + 1
+
+            # Nếu thắng hoặc thua thì trả về hàm đánh giá
             if gameState.isWin() or gameState.isLose() or currentDepth == self.depth:
                 return self.evaluationFunction(gameState)
+
+            # Đệ quy tìm giá trị max cho pacman
             maxValue = -float('inf')
             actions = gameState.getLegalActions(0)
             for action in actions:
@@ -185,8 +188,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
         numberOfGhosts = gameState.getNumAgents() - 1
 
         def minLevel(gameState, depth, agentIndex):
+
+            # Nếu thắng hoặc thua thì trả về hàm đánh giá
             if gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
+
+            # Đệ quy tìm giá trị min của ghost
             minValue = float('inf')
             for action in gameState.getLegalActions(agentIndex):
                 successor = gameState.generateSuccessor(agentIndex, action)
@@ -196,6 +203,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     minValue = min(minValue, minLevel(successor, depth, agentIndex + 1))
             return minValue
         
+
+        # Đánh giá action nào sẽ cho điểm chuẩn cao nhất
         currentScore = -float('inf')
         bestAction = ''
         for action in gameState.getLegalActions(0):
@@ -204,7 +213,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 currentScore = score
                 bestAction = action
         return bestAction
-        util.raiseNotDefined()
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -217,7 +225,57 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        alpha = -float('inf')
+        beta = float('inf')
+        def maxLevel(gameState, depth, alpha, beta):
+            currentDepth = depth + 1
+            if gameState.isWin() or gameState.isLose() or currentDepth == self.depth:
+                return self.evaluationFunction(gameState)
+
+            maxValue = -float('inf')
+            actions = gameState.getLegalActions(0)
+
+            for action in actions:
+                successor = gameState.generateSuccessor(0, action)
+                maxValue = max(maxValue, minLevel(successor, currentDepth, 1, alpha, beta))
+                if maxValue > beta:
+                    return maxValue
+                alpha = max(alpha, maxValue)
+            return maxValue
+
+        numberOfGhosts = gameState.getNumAgents() - 1
+
+        def minLevel(gameState, depth, agentIndex, alpha, beta):
+            if gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState)
+
+            minValue = float('inf')
+
+            for action in gameState.getLegalActions(agentIndex):
+                successor = gameState.generateSuccessor(agentIndex, action)
+                if agentIndex == numberOfGhosts:
+                    minValue = min(minValue, maxLevel(successor, depth, alpha, beta))
+                    if minValue < alpha:
+                        return minValue
+                    beta = min(minValue, beta)
+                else:
+                    minValue = min(minValue, minLevel(successor, depth, agentIndex + 1, alpha, beta))
+                    if minValue < alpha:
+                        return minValue
+                    beta = min(minValue, beta)
+            return minValue
+
+        currentScore = -float('inf')
+        bestAction = ''
+        for action in gameState.getLegalActions(0):
+            score = minLevel(gameState.generateSuccessor(0, action), 0, 1, alpha, beta)
+            if score > currentScore:
+                currentScore = score
+                bestAction = action
+            if score > beta:
+                return bestAction
+            alpha = max(alpha, score)
+        return bestAction
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -233,11 +291,17 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        # util.raiseNotDefined()
+
+        # Lấy giá trị max của pacman
         def maxLevel(gameState, depth):
+
             currentDepth = depth + 1
+
+            # Nếu thắng hoặc thua thì trả về hàm đánh giá
             if gameState.isWin() or gameState.isLose() or currentDepth == self.depth:
                 return self.evaluationFunction(gameState)
+            
+            # Đệ quy tìm giá trị max cho pacman
             maxValue = -float('inf')
             actions = gameState.getLegalActions(0)
             for action in actions:
@@ -247,9 +311,14 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         
         numberOfGhosts = gameState.getNumAgents() - 1
 
+        # Trả về trung bình của các chaneNode(các ghost)
         def chanceNode(gameState, depth, agentIndex):
+
+            # Nếu thắng hoặc thua thì trả về hàm đánh giá
             if gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
+
+            # Đệ quy tìm giá trị tổng trọng số các trạng thái cuối cùng
             avgValue = 0
             legalActions = gameState.getLegalActions(agentIndex)
             for action in legalActions:
@@ -260,6 +329,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                     avgValue = avgValue + chanceNode(successor, depth, agentIndex + 1)
             return avgValue/len(legalActions)
         
+
+        # Đánh giá xem action nào có giá trị trung bình cao nhất
         currentScore = -float('inf')
         bestAction = ''
         for action in gameState.getLegalActions(0):
@@ -281,12 +352,27 @@ def betterEvaluationFunction(currentGameState):
 
     foodPositions = currentGameState.getFood().asList()
     pacmanPosition = currentGameState.getPacmanPosition()
-    dis = manhattanDistance(foodPositions, pacmanPosition)
+    ghostPositions = currentGameState.getGhostPositions()
+    capsulePositions = currentGameState.getCapsules()
 
-    print(dis)
+    closetFood = 1
+    if len(foodPositions) != 0: 
+        closetFood = min([manhattanDistance(food, pacmanPosition) for food in foodPositions])
+    score = 1/closetFood * 10
+
+    score -= sum([manhattanDistance(pacmanPosition, ghost) for ghost in ghostPositions])
+
+    for ghost in ghostPositions:
+        temp = manhattanDistance(pacmanPosition, ghost)
+        if temp == 0:
+            score -=999
+        elif temp <= 1:
+            score -= 1/temp
+        else:
+            score += 1/temp
 
     # util.raiseNotDefined()
-    return int.parse(dis)
+    return currentGameState.getScore() + score
 
     
 
