@@ -511,30 +511,11 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    # def getClosestFood(position, food_list):
-    #     min_distance = 99999
-    #     closest_food = None
-    #     if food_list:
-    #         for food in food_list:
-    #             distance = util.manhattanDistance(position, food)
-    #             if distance < min_distance:
-    #                 min_distance = distance
-    #                 closest_food = food
-    #     return closest_food
-
     food_list = foodGrid.asList()
     total_distance = [0]
     for food in food_list:
-        total_distance.append(util.manhattanDistance(position, food))
+        total_distance.append(mazeDistance(position, food, problem.startingGameState))
     return max(total_distance)
-    # total_distance = 0
-    # closest_food = getClosestFood(position, food_list)
-    # while closest_food:
-    #     total_distance += util.manhattanDistance(position, closest_food)
-    #     position = closest_food
-    #     food_list.remove(closest_food)
-    #     closest_food = getClosestFood(position, food_list)
-    # return total_distance
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -567,6 +548,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.bfs(problem)
         util.raiseNotDefined()
 
 
@@ -604,6 +586,17 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x, y = state
 
         "*** YOUR CODE HERE ***"
+        min_distance = 99999
+        closest_food = None
+        food_list = self.food.asList()
+        for food in food_list:
+            distance = util.manhattanDistance(state, food)
+            if distance < min_distance:
+                min_distance = distance
+                closest_food = food
+        if state == closest_food:
+            return True
+        return False
         util.raiseNotDefined()
 
 
